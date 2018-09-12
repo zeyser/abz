@@ -1,0 +1,15 @@
+# Always use versioning! Choose stable versions
+FROM nginx:1.14
+
+# Here we use COPY instead ADD because it's best practice and COPY haven't additional functionality as unpacking tar files
+# and allowing src to bu URL
+
+# copy our configuration for server into systems nginx conf.d directory
+# in this directory we can see all our sites (for example: example.com.cond - with his server section in it)
+# default.conf - is a config file that would work if any another conf file exists, or if request is unhandled by another
+# conf file
+COPY ./docker/nginx/default.conf /etc/nginx/conf.d/default.conf
+
+# We need this because by default current workdir is /, so every time you connect into container or run some scripts it's
+# run from root
+WORKDIR /var/www
