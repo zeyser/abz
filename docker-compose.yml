@@ -1,13 +1,13 @@
 # check your docker version and set compatible number https://docs.docker.com/compose/compose-file/
 version: '3'
 services:
-    nginx:
+    api-nginx:
 
         # Build an image from a Dockerfile
         build:
 
             # build context. I think it's a directory  with whom docker work on build time
-            context: ./
+            context: ./api
 
             # actually our dockerfile from what we can build image and than container
             dockerfile: docker/nginx.docker
@@ -15,39 +15,34 @@ services:
         # included directories. With this dir-s our container can work in run time(read,write etc)
         # on column we set link between files in project(host) and system in container our/files:system/files
         volumes:
-            - ./:/var/www
+            - ./api:/var/www/api
             #- ./docker/nginx/ssl:/etc/nginx/ssl
         ports:
-            - "8080:80"
+            - "8081:80"
         # I believe it need for substitution straight ip addresses on linking
         # but here[https://docs.docker.com/compose/compose-file/#links] is recommended not use link and instead use
         # user-defined networks https://docs.docker.com/network/
-#        links:
-#            - php-fpm
+        links:
+          - api-php-fpm
 
-    php-cli:
+    api-php-cli:
 
         # we can see this name with "docker ps". We can use something like this "docker exec -it php-cli-cont bash"
         # and we enter into console of the remote machine
-        container_name: php-cli-cont
+        container_name: php-cli-container
         build:
-            context: ./
+            context: ./api
             dockerfile: docker/php-cli.docker
         volumes:
-            - ./:/var/www
-        #links:
-        #    - mysql
-        #    - redis
-        #    - elasticsearch
+            - ./api:/var/www/api
+        links:
+            - api-mysql
 
         # In Laravel we use .env with predefined local variables, so here we can preset this var-s only for current
         # container
         environment:
             - "DB_PORT=3306"
             - "DB_HOST=mysql"
-            - "REDIS_PORT=6379"
-            - "REDIS_HOST=redis"
-            - "ELASTICSEARCH_HOSTS=elasticsearch:9200"
 
         # https://www.quora.com/What-does-the-t-or-tty-do-in-Docker
         # and https://stackoverflow.com/questions/36249744/interactive-shell-using-docker-compose#39150040
@@ -57,29 +52,24 @@ services:
         tty: true
         #stdin_open: true
 
-    php-fpm:
+    api-php-fpm:
         build:
-            context: ./
+            context: ./api
             dockerfile: docker/php-fpm.docker
         volumes:
-            - ./:/var/www
-        #links:
-#            - mysql
-        #    - redis
-        #    - elasticsearch
+            - ./api:/var/www/api
+        links:
+            - api-mysql
         environment:
             - "DB_PORT=3306"
             - "DB_HOST=mysql"
-            - "REDIS_PORT=6379"
-            - "REDIS_HOST=redis"
-            - "ELASTICSEARCH_HOSTS=elasticsearch:9200"
 
-    mysql:
-        image: mysql:5.7
+    api-mysql:
+        image: mysql:8.0
 
         # It's need for persistence. More info here https://hub.docker.com/_/mysql/
         volumes:
-            - ./storage/docker/mysql:/var/lib/mysql
+            - ./api/storage/docker/mysql:/var/lib/mysql
         environment:
             - "MYSQL_ROOT_PASSWORD=secret"
             - "MYSQL_USER=app"
@@ -87,3 +77,22 @@ services:
             - "MYSQL_DATABASE=abz"
         ports:
             - "33061:3306"
+
+    frontend-nginx:
+        build:
+            context: ./frontend/docker
+            dockerfile: nginx.docker
+        volumes:
+            - ./frontend:/var/www/frontend
+        depends_on:
+            - api-php-fpm
+        ports:
+            - "8080:80"
+
+    frontend-nodejs:
+        container_name: node
+        image: node:10.11-jessie
+        volumes:
+            - ./frontend:/var/www/frontend
+        working_dir: /var/www/frontend
+        tty: true
