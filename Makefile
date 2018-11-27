@@ -1,6 +1,10 @@
 # It would be better to use docker-compose without sudo
 # TODO Info about switching already exists(mb add here link)
-d-up: memory
+
+init: d-up frontend-install frontend-build
+
+
+d-up:
 	sudo docker-compose up -d
 
 d-down:
@@ -11,6 +15,14 @@ d-build:
 
 cli:
 	sudo docker exec -it php-cli-cont bash
+
+# install all needed in frontend (node_modules, etc)
+frontend-install:
+	docker-compose exec frontend-nodejs npm install
+
+# build app (from src into dist directory)
+frontend-build:
+	docker-compose exec frontend-nodejs npm run build
 
 # Set for host machine permissions to write in storage and cache
 # by default www-data can't write to this directories because of repository was created by system user(KpoT)
