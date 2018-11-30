@@ -3,7 +3,6 @@
 
 init: d-up frontend-install frontend-build
 
-
 d-up:
 	sudo docker-compose up -d
 
