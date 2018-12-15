@@ -8,7 +8,8 @@ plugins.push(
   ...(require('./htmlPlugin')),
   ...(require('./internal')),
   require('./caseSensitivePlugin'),
-  require('./extractPlugin')
+  require('./extractPlugin'),
+  require('./vueLoaderPlugin')
 );
 
 if (manifest.IS_DEVELOPMENT) {

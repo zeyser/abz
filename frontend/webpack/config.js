@@ -28,6 +28,7 @@ const
 const
   entry = [
     path.join(manifest.paths.src, 'scripts', manifest.entries.js),
+    path.join(manifest.paths.srcVue, manifest.entries.vue),
   ];
 
 

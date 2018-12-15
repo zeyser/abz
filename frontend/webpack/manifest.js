@@ -45,7 +45,9 @@ const
 const
   paths = {
     src   : dir('../adminator'),
+    srcVue   : dir('../src'),
     build : dir('../dist/admin'),
+    buildVue : dir('../dist'),
   };
 
 
@@ -57,6 +59,7 @@ const
   outputFiles = {
     bundle : 'bundle.js',
     vendor : 'vendor.js',
+    vue : 'vue.js',
     css    : 'style.css',
   };
 
@@ -68,6 +71,7 @@ const
 const
   entries = {
     js   : 'index.js',
+    vue   : 'main.js',
   };
 
 
